@@ -1,0 +1,48 @@
+{
+   "name": "ianreid/switcher",
+   "description": "The most advanced sites switcher for Craft CMS.",
+   "type": "craft-plugin",
+   "version": "1.0",
+   "keywords": [
+      "craft",
+      "cms",
+      "localization",
+      "language",
+      "language switcher",
+      "locale",
+      "site",
+      "craftcms",
+      "craft-plugin"
+   ],
+   "support": {
+      "docs": "https://www.reidlangevin.com",
+      "issues": "https://www.reidlangevin.com"
+   },
+   "license": "MIT",
+   "authors": [
+      {
+         "name": "Ian Reid Langevin",
+         "homepage": "https://www.reidlangevin.com"
+      }
+   ],
+   "require": {
+      "craftcms/cms": "^3.0|^4.0"
+   },
+   "autoload": {
+      "psr-4": {
+         "ianreid\\switcher\\": "src/"
+      }
+   },
+   "extra": {
+      "name": "Switcher",
+      "handle": "switcher",
+      "developer": "Ian Reid Langevin",
+      "developerUrl": "https://www.reidlangevin.com",
+      "documentationUrl": "https://www.reidlangevin.com",
+      "changelogUrl": "https://www.reidlangevin.com",
+      "class": "ianreid\\switcher\\Switcher"
+   },
+   "require-dev": {
+      "craftcms/rector": "dev-main"
+   }
+}
