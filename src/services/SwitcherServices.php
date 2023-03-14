@@ -5,6 +5,7 @@ namespace ianreid\switcher\services;
 use ianreid\switcher\Switcher;
 
 use Craft;
+use craft\helpers\ArrayHelper;
 use craft\base\Component;
 use craft\services\Elements;
 use craft\models\Site;
@@ -21,7 +22,7 @@ class SwitcherServices extends Component
       */
    private $_switcherLinks = [];
    private $_sites = [];
-   private $_enabledSitesIds = [];
+   private $_switcherValues = [];
    private $_sourceUrls = [];
    private $_currentSite;
 
@@ -33,17 +34,40 @@ class SwitcherServices extends Component
       $this->_currentSite = Craft::$app->getSites()->currentSite;
    }
 
-
    /** getSwitcherSites
     * @return array|null
     */
 
    public function buildSwitcher(mixed $source, bool $removeCurrent, bool $onlyCurrentGroup, bool $redirectHomeIfMissing)
    {
-      $this->_sites = $this->getSwitcherSites($onlyCurrentGroup);
-      $this->_enabledSitesIds = $this->getEnabledSitesForSource($source);
+      $this->_sites = $this->getSwitcherSites($onlyCurrentGroup, $removeCurrent);
+      $this->_switcherValues = $this->getEnabledSitesForSource($source);
 
-      return $this->_enabledSitesIds;
+      return $this->_switcherValues;
+   }
+
+   /**
+    * Return all the sites or only ones from the current group
+    *
+    * @param bool $onlyCurrentGroup
+    *
+    * @return array
+    */
+   public function getSwitcherSites($onlyCurrentGroup, $removeCurrent): array
+   {
+      $sites = [];
+
+      if ($onlyCurrentGroup === true) {
+         $sites = Craft::$app->getSites()->getGroupById($this->_currentSite->groupId)->getSites();
+      } else {
+         $sites = Craft::$app->getSites()->getAllSites();
+      }
+      if ($removeCurrent === true) {
+         ArrayHelper::removeValue($sites, $this->_currentSite);
+      }
+
+      return $sites;
+
    }
 
 
@@ -58,7 +82,7 @@ class SwitcherServices extends Component
     *    0 => [ "url" => "https://siteurl.com/page-uri", "site" => craft\models\Site ]
     *    1 => [ "url" => "https://siteurl.com/page-uri", "site" => craft\models\Site ]
     *   ]
-   */
+    */
    public function getEnabledSitesForSource($source): array
    {
 
@@ -68,6 +92,7 @@ class SwitcherServices extends Component
       // to do -> if $source is not element, but array, filter the siteID from the array
       $enabledSitesIds = Craft::$app->elements->getEnabledSiteIdsForElement($source->id);
 
+      // filter all sites with only the enabled one for this Element
       if (!empty($enabledSitesIds)) {
          $enabledSites = array_filter($this->_sites, fn ($site) => in_array($site->id, $enabledSitesIds, true));
       }
@@ -82,25 +107,10 @@ class SwitcherServices extends Component
             $urlSite['site'] = $site;
             // merge into array
             $urlsWithSites = array_merge($urlsWithSites, [$urlSite]);
-
          }
+         unset($site);
       }
 
       return $urlsWithSites;
-   }
-
-
-
-
-
-   // DRAFT -> NEEDED ? MAYBE JUST AN EXAMPLE IN TWIG WITH THE FILTER
-   public function getSwitcherSites($onlyCurrentGroup)
-   {
-      if ($onlyCurrentGroup === true) {
-         $sites = Craft::$app->getSites()->getGroupById($this->_currentSite->groupId)->getSites();
-      } else {
-         $sites = Craft::$app->getSites()->getAllSites();
-      }
-      return $sites;
    }
 }

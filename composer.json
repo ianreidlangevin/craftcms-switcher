@@ -1,6 +1,6 @@
 {
    "name": "ianreid/switcher",
-   "description": "The most advanced sites switcher for Craft CMS.",
+   "description": "An advanced sites switcher for Craft CMS.",
    "type": "craft-plugin",
    "version": "1.0",
    "keywords": [
