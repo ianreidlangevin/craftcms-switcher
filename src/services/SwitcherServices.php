@@ -20,18 +20,15 @@ class SwitcherServices extends Component
    /*
       * @var
       */
-   private $_switcherLinks = [];
    private $_sites = [];
    private $_switcherValues = [];
    private $_sourceUrls = [];
-   private $_currentSite;
 
    // Constructor
    // --------------------------------------------------------------------------
 
    public function __construct()
    {
-      $this->_currentSite = Craft::$app->getSites()->currentSite;
    }
 
    /** getSwitcherSites
@@ -40,8 +37,8 @@ class SwitcherServices extends Component
 
    public function buildSwitcher(mixed $source, bool $removeCurrent, bool $onlyCurrentGroup, bool $redirectHomeIfMissing)
    {
-      $this->_sites = $this->getSwitcherSites($onlyCurrentGroup, $removeCurrent);
-      $this->_switcherValues = $this->getEnabledSitesForSource($source);
+      $this->_sites = $this->getSitesForSwitcher($onlyCurrentGroup, $removeCurrent);
+      $this->_switcherValues = $this->getEnabledSitesForSource($source, $redirectHomeIfMissing);
 
       return $this->_switcherValues;
    }
@@ -53,21 +50,22 @@ class SwitcherServices extends Component
     *
     * @return array
     */
-   public function getSwitcherSites($onlyCurrentGroup, $removeCurrent): array
+   public function getSitesForSwitcher($onlyCurrentGroup, $removeCurrent): array
    {
-      $sites = [];
+      $currentSite = Craft::$app->getSites()->currentSite;
+      $sites = Craft::$app->getSites()->getAllSites();
 
+      // if argument onlyCurrentGroup is true, filter array by the current group ID
       if ($onlyCurrentGroup === true) {
-         $sites = Craft::$app->getSites()->getGroupById($this->_currentSite->groupId)->getSites();
-      } else {
-         $sites = Craft::$app->getSites()->getAllSites();
+         $sites = array_filter($sites, fn ($site) => $site->groupId === $currentSite->groupId);
       }
+
+      // if argument removeCurrent is true
       if ($removeCurrent === true) {
-         ArrayHelper::removeValue($sites, $this->_currentSite);
+         ArrayHelper::removeValue($sites, $currentSite);
       }
 
       return $sites;
-
    }
 
 
@@ -83,34 +81,42 @@ class SwitcherServices extends Component
     *    1 => [ "url" => "https://siteurl.com/page-uri", "site" => craft\models\Site ]
     *   ]
     */
-   public function getEnabledSitesForSource($source): array
+   public function getEnabledSitesForSource($source, $redirectHomeIfMissing): array
    {
 
-      $enabledSites = [];
-      $urlsWithSites = [];
+      $enabledSites = $this->_sites;
+      $switcherItems = [];
 
       // to do -> if $source is not element, but array, filter the siteID from the array
       $enabledSitesIds = Craft::$app->elements->getEnabledSiteIdsForElement($source->id);
 
       // filter all sites with only the enabled one for this Element
-      if (!empty($enabledSitesIds)) {
+      if($redirectHomeIfMissing === false) {
          $enabledSites = array_filter($this->_sites, fn ($site) => in_array($site->id, $enabledSitesIds, true));
       }
-
+      
 
       if (!empty($enabledSites)) {
+
          foreach ($enabledSites as $site) {
-            $urlSite = [];
+            $urlAndSite = [];
             $uri = Craft::$app->elements->getElementUriForSite($source->id, $site->id);
-            // push value in array keys
-            $urlSite['url'] = rtrim($site->baseUrl, '/') . '/' . $uri;
-            $urlSite['site'] = $site;
+            // if source is not enabled for a site but exist, add the home redirect (baseUrl) 
+            // for the site if $redirectHomeIfMissing is true
+            if ($redirectHomeIfMissing === true and !in_array($site->id, $enabledSitesIds)) {
+               $urlAndSite['url'] = $site->baseUrl;
+            // else, build the url with the Uri
+            } else {
+               $urlAndSite['url'] = rtrim($site->baseUrl, '/') . '/' . $uri;
+            }
+            $urlAndSite['site'] = $site;
             // merge into array
-            $urlsWithSites = array_merge($urlsWithSites, [$urlSite]);
+            $switcherItems = array_merge($switcherItems, [$urlAndSite]);
          }
          unset($site);
+
       }
 
-      return $urlsWithSites;
+      return $switcherItems;
    }
 }
