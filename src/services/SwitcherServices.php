@@ -2,46 +2,37 @@
 
 namespace ianreid\switcher\services;
 
-use ianreid\switcher\Switcher;
-
 use Craft;
 use craft\helpers\ArrayHelper;
+use craft\base\Element;
 use craft\base\Component;
-use craft\services\Elements;
-use craft\models\Site;
-use craft\models\SiteGroup;
-use craft\events\SiteEvent;
-use craft\events\SiteGroupEvent;
 
 class SwitcherServices extends Component
 {
 
-   // https://github.com/craftcms/cms/blob/v3/src/web/UrlManager.php
    /*
       * @var
-      */
+   */
    private $_sites = [];
-   private $_switcherValues = [];
-   private $_sourceUrls = [];
 
-   // Constructor
-   // --------------------------------------------------------------------------
 
-   public function __construct()
-   {
-   }
-
-   /** getSwitcherSites
-    * @return array|null
+   /**
+    * @return array
     */
 
-   public function buildSwitcher(mixed $source, bool $removeCurrent, bool $onlyCurrentGroup, bool $redirectHomeIfMissing)
+   public function constructLangSwitcher(mixed $source, bool $removeCurrent, bool $onlyCurrentGroup, bool $redirectHomeIfMissing): array
    {
       $this->_sites = $this->getSitesForSwitcher($onlyCurrentGroup, $removeCurrent);
-      $this->_switcherValues = $this->getEnabledSitesForSource($source, $redirectHomeIfMissing);
 
-      return $this->_switcherValues;
+      if ($source instanceof Element) {
+         $switcherValues = $this->setSwitcherForElement($source, $redirectHomeIfMissing);
+      } elseif (is_array($source)) {
+         $switcherValues = $this->setSwitcherForCustomSource($source);
+      }
+
+      return $switcherValues;
    }
+
 
    /**
     * Return all the sites or only ones from the current group
@@ -50,7 +41,7 @@ class SwitcherServices extends Component
     *
     * @return array
     */
-   public function getSitesForSwitcher($onlyCurrentGroup, $removeCurrent): array
+   private function getSitesForSwitcher(bool $onlyCurrentGroup, bool $removeCurrent): array
    {
       $currentSite = Craft::$app->getSites()->currentSite;
       $sites = Craft::$app->getSites()->getAllSites();
@@ -59,13 +50,58 @@ class SwitcherServices extends Component
       if ($onlyCurrentGroup === true) {
          $sites = array_filter($sites, fn ($site) => $site->groupId === $currentSite->groupId);
       }
-
       // if argument removeCurrent is true
       if ($removeCurrent === true) {
          ArrayHelper::removeValue($sites, $currentSite);
       }
 
       return $sites;
+   }
+
+
+
+   /**
+    * If source is an array (ex: checkout pages, search results, etc.)
+    *
+    * @param array $sourceElements
+    *
+    * @return array
+    */
+   private function setSwitcherForCustomSource(array $sourceElements): array
+   {
+
+      $switcherItems = [];
+
+      foreach ($sourceElements as $item) {
+
+         $relatedSite = null;
+
+         if (array_key_exists('siteId', $item)) {
+            foreach ($this->_sites as $site) {
+               if ($site->id === $item['siteId']) {
+                  $relatedSite = $site;
+                  break;
+               }
+            }
+            unset($site);
+         }
+
+         if ($relatedSite === null) continue;
+
+         $urlAndSite = [];
+         $urlAndSite['site'] = $relatedSite;
+
+         if (array_key_exists('uri', $item)) {
+            $urlAndSite['url'] = rtrim($relatedSite->baseUrl, '/') . '/' . $item['uri'];
+         } else {
+            $urlAndSite['url'] = $site->baseUrl;
+         }
+
+         $switcherItems = array_merge($switcherItems, [$urlAndSite]);
+      }
+      unset($item);
+
+      return $switcherItems;
    }
 
 
@@ -81,7 +117,7 @@ class SwitcherServices extends Component
     *    1 => [ "url" => "https://siteurl.com/page-uri", "site" => craft\models\Site ]
     *   ]
     */
-   public function getEnabledSitesForSource($source, $redirectHomeIfMissing): array
+   private function setSwitcherForElement(Element $source, bool $redirectHomeIfMissing): array
    {
 
       $enabledSites = $this->_sites;
@@ -91,31 +127,26 @@ class SwitcherServices extends Component
       $enabledSitesIds = Craft::$app->elements->getEnabledSiteIdsForElement($source->id);
 
       // filter all sites with only the enabled one for this Element
-      if($redirectHomeIfMissing === false) {
+      if ($redirectHomeIfMissing === false) {
          $enabledSites = array_filter($this->_sites, fn ($site) => in_array($site->id, $enabledSitesIds, true));
       }
-      
 
-      if (!empty($enabledSites)) {
-
-         foreach ($enabledSites as $site) {
-            $urlAndSite = [];
-            $uri = Craft::$app->elements->getElementUriForSite($source->id, $site->id);
-            // if source is not enabled for a site but exist, add the home redirect (baseUrl) 
-            // for the site if $redirectHomeIfMissing is true
-            if ($redirectHomeIfMissing === true and !in_array($site->id, $enabledSitesIds)) {
-               $urlAndSite['url'] = $site->baseUrl;
+      foreach ($enabledSites as $site) {
+         $urlAndSite = [];
+         $uri = Craft::$app->elements->getElementUriForSite($source->id, $site->id);
+         // if source is not enabled for a site but exist, add the home redirect (baseUrl) 
+         // for the site if $redirectHomeIfMissing is true
+         if ($redirectHomeIfMissing === true and !in_array($site->id, $enabledSitesIds)) {
+            $urlAndSite['url'] = $site->baseUrl;
             // else, build the url with the Uri
-            } else {
-               $urlAndSite['url'] = rtrim($site->baseUrl, '/') . '/' . $uri;
-            }
-            $urlAndSite['site'] = $site;
-            // merge into array
-            $switcherItems = array_merge($switcherItems, [$urlAndSite]);
+         } else {
+            $urlAndSite['url'] = rtrim($site->baseUrl, '/') . '/' . $uri;
          }
-         unset($site);
-
+         $urlAndSite['site'] = $site;
+         // merge into array
+         $switcherItems = array_merge($switcherItems, [$urlAndSite]);
       }
+      unset($site);
 
       return $switcherItems;
    }
