@@ -15,7 +15,7 @@ class SwitcherServices extends Component
    // --------------------------------------------------------------------------
 
    private $_switcherSites = [];
-   private $_allsites = [];
+   private $_allSites = [];
    private $_currentSite;
 
 
@@ -24,7 +24,7 @@ class SwitcherServices extends Component
 
    public function __construct()
    {
-      $this->_allsites = Craft::$app->getSites()->getAllSites();
+      $this->_allSites = Craft::$app->getSites()->getAllSites();
       $this->_currentSite = Craft::$app->getSites()->currentSite;
    }
 
@@ -38,7 +38,7 @@ class SwitcherServices extends Component
     * @return array
     */
 
-   public function constructLangSwitcher(mixed $source, bool $removeCurrent, bool $onlyCurrentGroup, bool $redirectHomeIfMissing): array
+   public function constructLangSwitcher(mixed $source = null, bool $removeCurrent = true, bool $onlyCurrentGroup = true, bool $redirectHomeIfMissing = false): array
    {
       $this->_switcherSites = $this->getSitesBasedOnParams($onlyCurrentGroup, $removeCurrent);
 
@@ -162,7 +162,7 @@ class SwitcherServices extends Component
     */
    public function constructAlternateLocale(bool $onlyCurrentGroup = true): array
    {
-      $sites = $this->_allsites;
+      $sites = $this->_allSites;
 
       if ($onlyCurrentGroup === true) {
          $sites = $this->getOnlyCurrentGroupSites($sites, $this->_currentSite);
