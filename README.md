@@ -69,7 +69,7 @@ array [
 {% set languages = langSwitcher(entry) %}
 
 {% if languages|length %}
-   {% for lang in languages %}
+   {% for item in languages %}
       <a 
          href="{{ url(item.url) }}" 
          hreflang="{{item.site.language}}" 
@@ -123,7 +123,7 @@ You can use switcher to change sites on pages that are not Craft Elements. For e
 {% set languages = langSwitcher(customSource, false, false, true) %}
 
 {% if languages|length %}
-   {% for lang in languages %}
+   {% for item in languages %}
       <a 
          href="{{ url(item.url) }}" 
          hreflang="{{item.site.language}}" 
