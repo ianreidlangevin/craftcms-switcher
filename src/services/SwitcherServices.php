@@ -96,15 +96,17 @@ class SwitcherServices extends Component
 
       foreach ($enabledSites as $site) {
          $urlAndSite = [];
-         $uri = Craft::$app->elements->getElementUriForSite($sourceElement->id, $site->id);
          // if source is not enabled for a site but exists, add the home redirect (baseUrl) 
          if ($redirectHomeIfMissing === true and !in_array($site->id, $enabledSitesIds)) {
             $urlAndSite['url'] = $site->baseUrl;
+         } elseif ($sourceElement->uriFormat === "__home__") {
+            $urlAndSite['url'] = $site->baseUrl;
          } else {
+            $uri = Craft::$app->elements->getElementUriForSite($sourceElement->id, $site->id);
             $urlAndSite['url'] = rtrim($site->baseUrl, '/') . '/' . $uri;
          }
          $urlAndSite['site'] = $site;
-         
+
          $switcherData = array_merge($switcherData, [$urlAndSite]);
       }
       unset($site);

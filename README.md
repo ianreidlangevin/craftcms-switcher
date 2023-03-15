@@ -75,7 +75,7 @@ array [
          hreflang="{{item.site.language}}" 
          lang="{{item.site.language}}" 
       >
-         {{ item.site.name [0:2]|capitalize }} // the 2 first letters only
+         {{ item.site.language [0:2]|capitalize }} {# the 2 first letters only #}
       </a>
    {% endfor %}
 {% endif %}
@@ -99,7 +99,7 @@ array [
             hreflang="{{item.site.language}}" 
             lang="{{item.site.language}}" 
          >
-            {{ item.site.name }}
+            {{ item.site.language }}
          </a>
       {% endfor %}
 
@@ -129,7 +129,7 @@ You can use switcher to change sites on pages that are not Craft Elements. For e
          hreflang="{{item.site.language}}" 
          lang="{{item.site.language}}" 
       >
-         {{ item.site.name [0:2]|capitalize }} // the 2 first letters only
+         {{ item.site.language [0:2]|capitalize }} {# the 2 first letters only #}
       </a>
    {% endfor %}
 {% endif %}
