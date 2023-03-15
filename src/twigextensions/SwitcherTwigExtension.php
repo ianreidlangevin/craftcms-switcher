@@ -20,20 +20,9 @@ class SwitcherTwigExtension extends AbstractExtension
    public function getFunctions()
    {
       return [
-         new TwigFunction('langSwitcher', [$this, 'getSwitcher'])
-      ];
-   }
+         new TwigFunction('langSwitcher', [Switcher::getInstance()->switcherServices, 'constructLangSwitcher']),
+         new TwigFunction('localeAlternate', [Switcher::getInstance()->switcherServices, 'constructAlternateLocale'])
 
-   public function getSwitcher(
-      mixed $source = null, 
-      bool $removeCurrent = false, 
-      bool $onlyCurrentGroup = false, 
-      bool $redirectHomeIfMissing = false
-   )
-   {
-      $langSwitcher = Switcher::getInstance()
-         ->switcherServices
-         ->constructLangSwitcher($source, $removeCurrent, $onlyCurrentGroup, $redirectHomeIfMissing);
-      return $langSwitcher;
+      ];
    }
 }
