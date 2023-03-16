@@ -2,7 +2,7 @@
    "name": "ianreid/switcher",
    "description": "A flexible and easy to use sites switcher for Craft CMS.",
    "type": "craft-plugin",
-   "version": "1.0.1",
+   "version": "1.0.2",
    "keywords": [
       "craft",
       "cms",
@@ -38,8 +38,8 @@
       "handle": "switcher",
       "developer": "Ian Reid Langevin",
       "developerUrl": "https://www.reidlangevin.com",
-      "documentationUrl": "https://www.reidlangevin.com",
-      "changelogUrl": "https://www.reidlangevin.com",
+      "documentationUrl": "https://github.com/ianreidlangevin/craftcms-switcher",
+      "changelogUrl": "https://github.com/ianreidlangevin/craftcms-switcher",
       "class": "ianreid\\switcher\\Switcher"
    },
    "require-dev": {

@@ -40,6 +40,7 @@ class SwitcherServices extends Component
 
    public function constructLangSwitcher(mixed $source = null, bool $removeCurrent = true, bool $onlyCurrentGroup = true, bool $redirectHomeIfMissing = false): array
    {
+      $switcherValues = [];
       $this->_switcherSites = $this->getSitesBasedOnParams($onlyCurrentGroup, $removeCurrent);
 
       if ($source instanceof Element) {
