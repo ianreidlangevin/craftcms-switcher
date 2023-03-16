@@ -135,14 +135,58 @@ You can use switcher to change sites on pages that are not Craft Elements. For e
 {% endif %}
 ```
 
+#### Usage on a per-template basis
+
+You can also set the source in your template. This is probably the way that you want to implement it on big projects.
+
+In the following example, you can set the `langCustomSource` variable in your template. If not defined, it will fallback to `entry`.
+
+```
+
+{% set languages = langSwitcher(langCustomSource|default(entry ?? null)) %}
+
+{% if languages|length %}
+   {% for item in languages %}
+      <a 
+         href="{{ url(item.url) }}" 
+         hreflang="{{item.site.language}}" 
+         lang="{{item.site.language}}" 
+      >
+         {{ item.site.language [0:2]|capitalize }} {# the 2 first letters only #}
+      </a>
+   {% endfor %}
+{% endif %}
+```
+
+##### In your template, you can now do it :
+
+For an array (ex: with custom routes)
+
+```
+{% set langCustomSource = [ 
+      {'uri':'cart', 'siteId': 1},
+      {'uri':'panier', 'siteId': 2}, 
+      {'uri':'cesta', 'siteId': 3},
+   ]
+%}
+```
+
+For another Element than an Entry
+
+```
+{% set langCustomSource = product %}
+```
+
+
+
 ## Hreflang in head
 
-The plugin also provides the ability to easily set the alternate languages. It can be very useful for the `og:locale:alternate` property.
+The plugin also provides the ability to easily set the alternate languages. It can be useful for the `og:locale:alternate` property.
 
 ### langSwitcher()
 
 ```
-{% set localeAlternate = localeAlternate(false) %}
+{% set otherLocales = localeAlternate(false) %}
 ```
 
 #### Parameters
