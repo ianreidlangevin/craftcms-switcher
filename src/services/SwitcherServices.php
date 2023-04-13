@@ -92,7 +92,7 @@ class SwitcherServices extends Component
       $enabledSitesIds = Craft::$app->elements->getEnabledSiteIdsForElement($sourceElement->id);
 
       if ($redirectHomeIfMissing === false) {
-         $enabledSites = array_filter($this->_switcherSites, fn ($site) => in_array($site->id, $enabledSitesIds, true));
+         $enabledSites = array_filter($this->_switcherSites, fn ($site) => in_array($site->id, $enabledSitesIds, false));
       }
 
       foreach ($enabledSites as $site) {

@@ -141,6 +141,8 @@ You can also set the source in your template. This is probably the way that you 
 
 In the following example, you can set the `langCustomSource` variable in your template. If not defined, it will fallback to `entry`.
 
+##### Add this code to your navbar or main layout
+
 ```
 
 {% set languages = langSwitcher(langCustomSource|default(entry ?? null)) %}
@@ -158,7 +160,7 @@ In the following example, you can set the `langCustomSource` variable in your te
 {% endif %}
 ```
 
-##### In your template, you can now do it :
+##### In your section template, you can now do it :
 
 For an array (ex: with custom routes)
 
