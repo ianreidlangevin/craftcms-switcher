@@ -158,25 +158,6 @@ class SwitcherServices extends Component
    }
 
    /**
-    * Returns the alternate locales - useful to build the og:locale:alternate meta
-    *
-    * @param bool $onlyCurrentGroup
-    * @return array
-    */
-   public function constructAlternateLocale(bool $onlyCurrentGroup = true): array
-   {
-      $sites = $this->_allSites;
-
-      if ($onlyCurrentGroup === true) {
-         $sites = $this->getOnlyCurrentGroupSites($sites, $this->_currentSite);
-      }
-
-      ArrayHelper::removeValue($sites, $this->_currentSite);
-
-      return $sites;
-   }
-
-   /**
     * Util method to return only the sites of the same group of the current site
     *
     * @param array $sites

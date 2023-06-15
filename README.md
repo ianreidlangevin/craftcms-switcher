@@ -29,10 +29,10 @@ Switcher for Craft CMS is a plugin that adds a Twig function to output a site sw
 
 ## Twig function
 
-### langSwitcher()
+### getSwitcherSites()
 
 ```
-{% set languages = langSwitcher(entry, false, false, false) %}
+{% set languages = getSwitcherSites(entry, false, false, false) %}
 ```
 
 #### Parameters
@@ -65,7 +65,7 @@ array [
 
 
 ```
-{% set languages = langSwitcher(entry) %}
+{% set languages = getSwitcherSites(entry) %}
 
 {% if languages|length %}
    {% for item in languages %}
@@ -83,7 +83,7 @@ array [
 ##### Grouping sites by groups
 
 ```
-{% set languages = langSwitcher(entry, false, false, true) %}
+{% set languages = getSwitcherSites(entry, false, false, true) %}
 
 {% if languages|length %}
 
@@ -113,12 +113,16 @@ You can also set the source in your template. __This is probably the way that yo
 
 In the following example, you can set the `langSource` variable in your template. If not defined, it will fallback to `entry`.
 
-##### Add this code to your navbar or main layout
+##### Add this code to your navbar (or in your main layout if you want to access languages in different places)
 
 ```
 
-{% set languages = langSwitcher(langSource|default(entry ?? null)) %}
+{% set languages = getSwitcherSites(langSource|default(entry ?? null)) %}
+```
 
+Then loop through the sites to display a sites switcher
+
+```
 {% if languages|length %}
    {% for item in languages %}
       <a 
@@ -132,7 +136,7 @@ In the following example, you can set the `langSource` variable in your template
 {% endif %}
 ```
 
-##### In your section template, you can now do this :
+##### In your section template, you can do this :
 
 For any `craft\base\Element` other than `Entry` (the default in the previous example)
 
@@ -159,36 +163,27 @@ For an array (ex: with custom routes)
 
 ## Hreflang in head
 
-The plugin also provides the ability to easily set the alternate languages. It can be useful for the `og:locale:alternate` property.
+You can also easily set the alternate languages. It can be useful for the `og:locale:alternate` property.
 
-### langSwitcher()
+##### Example of usage for the og:locale:alternate in `<head>`
+
+Set the `languages` variable somewhere in the top of your main layout file. 
+
+:bulb: You can pass this variable to your navbar if you want to avoid a duplicate query for your site switcher.
 
 ```
-{% set otherLocales = localeAlternate(false) %}
+{% set languages = langSwitcher(langCustomSource|default(entry ?? null)) %}
 ```
-
-#### Parameters
-
-| Param    | Type | Default | Description |
-| :-------- | :------- | :------- | :------- |
-| onlyCurrentGroup    | Bool    | true | Boolean value that determines whether only sites from the current group should be outputted |
-
-##### Usage for the og:locale:alternate in `<head>`
 
 ```
 <meta property="og:locale" content="{{ currentSite.language }}">
-{% set otherLocales = localeAlternate(false) %}
-{% if otherLocales|length %}
-   {% for site in otherLocales %}
-      <meta property="og:locale:alternate" content="{{ site.language }}">
+{% if languages|length %}
+   {% for item in languages %}
+      <meta property="og:locale:alternate" content="{{ item.site.language }}">
    {% endfor %}
 {% endif %}
 
 ```
-
-#### Returns
-
-This function returns an array of `craft\models\Site` without the current one.
 
 ---
 

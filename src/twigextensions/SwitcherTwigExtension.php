@@ -20,9 +20,10 @@ class SwitcherTwigExtension extends AbstractExtension
    public function getFunctions()
    {
       return [
+         // legacy naming
          new TwigFunction('langSwitcher', [Switcher::getInstance()->switcherServices, 'constructLangSwitcher']),
-         new TwigFunction('localeAlternate', [Switcher::getInstance()->switcherServices, 'constructAlternateLocale'])
-
+         // new name
+         new TwigFunction('getSwitcherSites', [Switcher::getInstance()->switcherServices, 'constructLangSwitcher'])
       ];
    }
 }
