@@ -2,7 +2,7 @@
    "name": "ianreid/switcher",
    "description": "A flexible and easy-to-use sites switcher for Craft CMS.",
    "type": "craft-plugin",
-   "version": "1.0.4",
+   "version": "1.1",
    "keywords": [
       "craft",
       "cms",

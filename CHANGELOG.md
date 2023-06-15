@@ -6,26 +6,27 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 ## 1.1
 ### Changed
-- Remove the localeAlternate() Twig function, use the default getSwitcherSites with default params instead.
-- Rename the langSwitcher() Twig function to getSwitcherSites(). Note that the legacy name is still supported.
+- Breaking: The localeAlternate() Twig function has been removed. Instead, use the default getSwitcherSites function with default parameters.
+- The Twig function previously known as langSwitcher() has been renamed to getSwitcherSites(). However, the legacy name remains supported for backward compatibility.
+- The readme has been updated with more detailed usage instructions.
 
 ## 1.0.4
-### Changed
-- Changed issues and changelog URLs
+### Updated
+- The URLs for issues and the changelog have been modified.
 
 ## 1.0.3
 ### Fixed
-- Fixed strict mode for loose comparison in in_array in the `buildDataForElement()` method. The strict comparaison was not working in PHP < 8.0.8
+- Resolved strict mode issues in buildDataForElement() method for loose comparison in in_array. The strict comparison wasn't functional in PHP versions earlier than 8.0.8.
 
 ## 1.0.2
 ### Fixed
-- Fixed a missing variable declaration for switcherValues
+- Rectified a missing declaration for the switcherValues variable.
 
 ## 1.0.1
 ### Fixed
-- Fixed a wrong variable name in ReadMe
-- Fixed URI if entry is __home__
+- Rectified a mistaken variable name in the ReadMe.
+- Fixed URI if entry is set to home
 
 ## 1.0.0
-### Added
-- Initial release
+### Introduced
+- Initial release of the plugin

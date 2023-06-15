@@ -12,7 +12,7 @@ This plugin requires Craft CMS 4.x
 
 To install the plugin, follow these instructions.
 
-1. Open your terminal and go to your Craft project:
+1. In your terminal, go to your Craft project:
 
         cd /path/to/project
 
@@ -23,52 +23,87 @@ To install the plugin, follow these instructions.
 
 ## Overview
 
-Switcher for Craft CMS is a plugin that adds a Twig function to output a site switcher on your website. This switcher can be used to output sites from the current group or all groups. The plugin is compatible with Craft CMS 4.x.
-
+The Switcher plugin for Craft CMS provides a Twig function for generating a site switcher on your webpage. This switcher can be configured to display sites from the current group or all groups. The plugin is compatible with Craft CMS 4.x.
 
 
 ## Twig function
 
+The `getSwitcherSites()` Twig function comes with several parameters. 
+
 ### getSwitcherSites()
-
-```
-{% set languages = getSwitcherSites(entry, false, false, false) %}
-```
-
-#### Parameters
 
 | Parameters    | Type | Default | Description |
 | :-------- | :------- | :------- | :------- |
-| source  | Element or Array  | null | An Element or an array to get the sites from. |
-| removeCurrent | Bool     | true | Boolean value that determines whether the current site should be removed from the output. |
-| onlyCurrentGroup    | Bool    | true | Boolean value that determines whether only sites from the current group should be outputted. |
-| redirectHomeIfMissing    | Bool    | false | Boolean value that determines whether to redirect to the home page if a site is missing. |
+| source  | Element or Array  | null | Element or array from which the sites are extracted. |
+| removeCurrent | Bool     | true | Determines whether the current site should be excluded from the output. |
+| onlyCurrentGroup    | Bool    | true | Specifies whether only sites from the current group should be shown. |
+| redirectHomeIfMissing    | Bool    | false | Decides whether to redirect to the home page if a site is missing. |
 
-#### Returns
 
-The function returns an array of items with the following keys: "url" and "site". The "url" key is the URL of the site, and the "site" key is the site model.
+### Recommended usage
+
+We suggest setting the source on a per-template basis. You can establish a fallback to `entry`, which allows you to set the variable for elements like categories, products, or an array of custom routes.
+
+##### 1. Define an availableSites variable in your main layout file
+
+`{% set availableSites = getSwitcherSites(switcherCustomSource|default(entry ?? null)) %}`
+
+In this variable, we use the `switcherCustomSource` variable as the source, with `entry` as the fallback, and then `null`.
+
+You can then pass this variable to your navbar or any file that includes a _site/languages_ switcher to prevent a redundant query.
+
+By defining an `availableSites` variable at the top of your main layout file, you can also use it for the `og:locale:alternate` meta in the head, the `<link rel=alternate>`, etc.
+
+
+##### 2. Determine your source in your page template
+
+For any `craft\base\Element` __other than `Entry`__ (the default in the previous example), you can do the following in your page template :
+
+```
+{% set switcherCustomSource = product %}
+```
+or 
+
+```
+{% set switcherCustomSource = category %}
+```
+
+or for an array (ex: with custom routes)
+
+```
+{% set switcherCustomSource = [ 
+      {'uri':'cart', 'siteId': 1},
+      {'uri':'panier', 'siteId': 2}, 
+      {'uri':'cesta', 'siteId': 3},
+   ]
+%}
+```
+
+### Output
+
+The function returns an array of items with two keys: "url" and "site". The "url" key is the site's URL, and the "site" key is the site model.
 
 ```
 array [
   0 => array [
-    "url" => "http://yoursite:8888/uri"
+    "url" => "http://yoursite.com/uri"
     "site" => craft\models\Site {}
   ]
   1 => array [
-    "url" => "http://yoursite:8888/en/uri"
+    "url" => "http://yoursite.com/en/uri"
     "site" => craft\models\Site {}
   ]
 ]
 ```
 
-#### Basic usage
+## Site Switcher Examples
 
+##### Basic usage
 
 ```
-{% set languages = getSwitcherSites(entry) %}
 
-{% if languages|length %}
-   {% for item in languages %}
+{% if availableSites|length %}
+   {% for item in availableSites %}
       <a 
          href="{{ url(item.url) }}" 
          hreflang="{{item.site.language}}" 
@@ -80,16 +115,15 @@ array [
 {% endif %}
 ```
 
-##### Grouping sites by groups
+##### Grouping Sites by Groups
 
 ```
-{% set languages = getSwitcherSites(entry, false, false, true) %}
 
-{% if languages|length %}
+{% if availableSites|length %}
 
-   {% set languagesByGroup = languages|group(lang => lang.site.group) %}
+   {% set availableSitesByGroup = availableSites|group(lang => lang.site.group) %}
 
-   {% for group, langs in languagesByGroup %}
+   {% for group, langs in availableSitesByGroup %}
 
       <h3 class="text-9 text-blue-500">{{ group }}</h3>
       {% for item in langs %}
@@ -106,86 +140,41 @@ array [
 {% endif %}
 ```
 
-
-#### Usage on a per-template basis
-
-You can also set the source in your template. __This is probably the way that you want to implement it on large projects__.
-
-In the following example, you can set the `langSource` variable in your template. If not defined, it will fallback to `entry`.
-
-##### Add this code to your navbar (or in your main layout if you want to access languages in different places)
+##### Displaying Only the First Two Letters of the Language
 
 ```
-
-{% set languages = getSwitcherSites(langSource|default(entry ?? null)) %}
-```
-
-Then loop through the sites to display a sites switcher
-
-```
-{% if languages|length %}
-   {% for item in languages %}
+{% if availableSites|length %}
+   {% for item in availableSites %}
       <a 
          href="{{ url(item.url) }}" 
          hreflang="{{item.site.language}}" 
          lang="{{item.site.language}}" 
       >
-         {{ item.site.language [0:2]|capitalize }} {# the 2 first letters only #}
+         {{ item.site.language [0:2]|capitalize }}
       </a>
    {% endfor %}
 {% endif %}
 ```
 
-##### In your section template, you can do this :
+##### Using for og:locale:alternate in `<head>`
 
-For any `craft\base\Element` other than `Entry` (the default in the previous example)
+Use your previously created `availableSites` variable if you wish to apply the same parameters, or create a different variable if not.
 
-```
-{% set langSource = product %}
-```
-
-```
-{% set langSource = category %}
-```
-
-
-For an array (ex: with custom routes)
-
-```
-{% set langSource = [ 
-      {'uri':'cart', 'siteId': 1},
-      {'uri':'panier', 'siteId': 2}, 
-      {'uri':'cesta', 'siteId': 3},
-   ]
-%}
-```
-
-
-## Hreflang in head
-
-You can also easily set the alternate languages. It can be useful for the `og:locale:alternate` property.
-
-##### Example of usage for the og:locale:alternate in `<head>`
-
-Set the `languages` variable somewhere in the top of your main layout file. 
-
-:bulb: You can pass this variable to your navbar if you want to avoid a duplicate query for your site switcher.
-
-```
-{% set languages = langSwitcher(langCustomSource|default(entry ?? null)) %}
-```
+:bulb: You must define your variable __PRIOR__ to the following meta property.
 
 ```
 <meta property="og:locale" content="{{ currentSite.language }}">
-{% if languages|length %}
-   {% for item in languages %}
+
+{% if availableSites|length %}
+   {% for item in availableSites %}
       <meta property="og:locale:alternate" content="{{ item.site.language }}">
    {% endfor %}
 {% endif %}
 
 ```
+> :bulb: All these examples can be adjusted based on the function parameters.
 
 ---
 
 
-Brought to you by [Ian Reid Langevin](https://www.reidlangevin.com)
+This plugin is brought to you by [Ian Reid Langevin](https://www.reidlangevin.com)
